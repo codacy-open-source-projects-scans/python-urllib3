@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import platform
 import socket
 import time
 import typing
@@ -98,13 +99,18 @@ class TestConnectionPoolTimeouts(SocketDummyServerTestCase):
             self.host, self.port, timeout=short_timeout, retries=False
         ) as pool:
             wait_for_socket(ready_event)
-            now = time.time()
+            now = time.perf_counter()
             with pytest.raises(ReadTimeoutError):
                 pool.request("GET", "/", timeout=LONG_TIMEOUT)
-            delta = time.time() - now
+            delta = time.perf_counter() - now
 
             message = "timeout was pool-level SHORT_TIMEOUT rather than request-level LONG_TIMEOUT"
-            assert delta >= (LONG_TIMEOUT - 1e-5), message
+            if platform.system() == "Windows":
+                # Adjust tolerance for floating-point comparison on Windows to
+                # avoid flakiness in CI #3413
+                assert delta >= (LONG_TIMEOUT - 1e-3), message
+            else:
+                assert delta >= (LONG_TIMEOUT - 1e-5), message
             block_event.set()  # Release request
 
             # Timeout passed directly to request should raise a request timeout
@@ -1301,6 +1307,7 @@ class TestRetryAfter(HypercornDummyServerTestCase):
             r = pool.request("GET", "/redirect_after", retries=False)
             assert r.status == 303
 
+            # Real timestamps are needed for this test
             t = time.time()
             r = pool.request("GET", "/redirect_after")
             assert r.status == 200
