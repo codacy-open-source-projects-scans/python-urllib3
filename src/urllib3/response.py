@@ -733,7 +733,7 @@ class HTTPResponse(BaseHTTPResponse):
         return length
 
     @contextmanager
-    def _error_catcher(self) -> typing.Generator[None, None, None]:
+    def _error_catcher(self) -> typing.Generator[None]:
         """
         Catch low-level python exceptions, instead re-raising urllib3
         variants, so that low-level exceptions are not leaked in the
@@ -812,7 +812,7 @@ class HTTPResponse(BaseHTTPResponse):
         happen.
 
         The known cases:
-          * 3.8 <= CPython < 3.9.7 because of a bug
+          * CPython < 3.9.7 because of a bug
             https://github.com/urllib3/urllib3/issues/2513#issuecomment-1152559900.
           * urllib3 injected with pyOpenSSL-backed SSL-support.
           * CPython < 3.10 only when `amt` does not fit 32-bit int.
@@ -1037,7 +1037,7 @@ class HTTPResponse(BaseHTTPResponse):
 
     def stream(
         self, amt: int | None = 2**16, decode_content: bool | None = None
-    ) -> typing.Generator[bytes, None, None]:
+    ) -> typing.Generator[bytes]:
         """
         A generator wrapper for the read() method. A call will block until
         ``amt`` bytes have been read from the connection or until the
@@ -1159,7 +1159,7 @@ class HTTPResponse(BaseHTTPResponse):
 
     def read_chunked(
         self, amt: int | None = None, decode_content: bool | None = None
-    ) -> typing.Generator[bytes, None, None]:
+    ) -> typing.Generator[bytes]:
         """
         Similar to :meth:`HTTPResponse.read`, but with an additional
         parameter: ``decode_content``.

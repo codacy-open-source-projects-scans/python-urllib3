@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import sys
 import typing
 from http.client import ResponseNotReady
 from unittest import mock
@@ -14,7 +13,7 @@ from urllib3.response import HTTPResponse
 
 
 @pytest.fixture()
-def pool() -> typing.Generator[HTTPConnectionPool, None, None]:
+def pool() -> typing.Generator[HTTPConnectionPool]:
     server.setup_class()
 
     with HTTPConnectionPool(server.host, server.port) as pool:
@@ -30,7 +29,6 @@ def test_returns_urllib3_HTTPResponse(pool: HTTPConnectionPool) -> None:
         assert isinstance(response, HTTPResponse)
 
 
-@pytest.mark.skipif(not hasattr(sys, "audit"), reason="requires python 3.8+")
 @mock.patch("urllib3.connection.sys.audit")
 def test_audit_event(audit_mock: mock.Mock, pool: HTTPConnectionPool) -> None:
     with contextlib.closing(pool._get_conn()) as conn:

@@ -78,8 +78,6 @@ RECENT_DATE = datetime.date(2023, 6, 1)
 
 _CONTAINS_CONTROL_CHAR_RE = re.compile(r"[^-!#$%&'*+.^_`|~0-9a-zA-Z]")
 
-_HAS_SYS_AUDIT = hasattr(sys, "audit")
-
 
 class HTTPConnection(_HTTPConnection):
     """
@@ -139,8 +137,9 @@ class HTTPConnection(_HTTPConnection):
         timeout: _TYPE_TIMEOUT = _DEFAULT_TIMEOUT,
         source_address: tuple[str, int] | None = None,
         blocksize: int = 16384,
-        socket_options: None
-        | (connection._TYPE_SOCKET_OPTIONS) = default_socket_options,
+        socket_options: None | (
+            connection._TYPE_SOCKET_OPTIONS
+        ) = default_socket_options,
         proxy: Url | None = None,
         proxy_config: ProxyConfig | None = None,
     ) -> None:
@@ -215,9 +214,7 @@ class HTTPConnection(_HTTPConnection):
                 self, f"Failed to establish a new connection: {e}"
             ) from e
 
-        # Audit hooks are only available in Python 3.8+
-        if _HAS_SYS_AUDIT:
-            sys.audit("http.client.connect", self, self.host, self.port)
+        sys.audit("http.client.connect", self, self.host, self.port)
 
         return sock
 
@@ -568,8 +565,9 @@ class HTTPSConnection(HTTPConnection):
         timeout: _TYPE_TIMEOUT = _DEFAULT_TIMEOUT,
         source_address: tuple[str, int] | None = None,
         blocksize: int = 16384,
-        socket_options: None
-        | (connection._TYPE_SOCKET_OPTIONS) = HTTPConnection.default_socket_options,
+        socket_options: None | (
+            connection._TYPE_SOCKET_OPTIONS
+        ) = HTTPConnection.default_socket_options,
         proxy: Url | None = None,
         proxy_config: ProxyConfig | None = None,
         cert_reqs: int | str | None = None,
