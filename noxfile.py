@@ -113,7 +113,6 @@ def tests_impl(
         "3.14",
         "3.14t",
         "3.15",
-        "pypy3.10",
         "pypy3.11",
     ]
 )
@@ -193,7 +192,7 @@ def downstream_botocore(session: nox.Session) -> None:
     session.cd(f"{tmp_dir}/botocore")
 
     session.run("python", "-c", "import urllib3; print(urllib3.__version__)")
-    session.run("python", "scripts/ci/run-tests")
+    session.run("python", "scripts/ci/run-tests", "--with-xdist")
 
 
 @nox.session()
@@ -275,7 +274,7 @@ def emscripten(session: nox.Session, runner: str) -> None:
         dist_dir = Path(os.environ["PYODIDE_ROOT"]) / "dist"
     else:
         # we don't have a build tree
-        pyodide_version = "0.28.1"
+        pyodide_version = "314.0.4"
 
         pyodide_artifacts_path = Path(session.cache_dir) / f"pyodide-{pyodide_version}"
         if not pyodide_artifacts_path.exists():
